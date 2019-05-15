@@ -1,0 +1,7 @@
+{
+  "name": "lipsum.info",
+  "version": "1.0.0",
+  "description": "A simple lorem ipsum site",
+  "main": "index.js",
+  "license": "MIT"
+}
