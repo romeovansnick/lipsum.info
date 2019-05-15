@@ -17,6 +17,7 @@
 
       h1 {
         text-align: center;
+        column-span: all;
       }
 
       footer {
@@ -33,6 +34,38 @@
 
       a, a:visited {
         color: #0366d6;
+      }
+
+
+      main p {
+        margin: 0 0 1em 0;
+      }
+
+      @media screen and (min-width: 64em) {
+        main {
+          column-count: 2;
+          column-width: 30em;
+          column-gap: 1em;
+          max-width: 64em;
+        }
+      }
+
+      @media screen and (min-width: 95em) {
+        main {
+          column-count: 3;
+          column-width: 30em;
+          column-gap: 1em;
+          max-width: 95em;
+        }
+      }
+
+      @media screen and (min-width: 126em) {
+        main {
+          column-count: 4;
+          column-width: 30em;
+          column-gap: 1em;
+          max-width: 126em;
+        }
       }
     </style>
   </head>
