@@ -9,3 +9,6 @@ dist/index.html: index.html
 
 open: dist/index.html
 	open dist/index.html
+
+github:
+	open https://github.com/romeovs/lipsum.info
