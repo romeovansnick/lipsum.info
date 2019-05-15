@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "description": "A simple lorem ipsum site",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "htmlmin": "^0.0.7"
+  }
 }
