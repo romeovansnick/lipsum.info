@@ -1,0 +1,93 @@
+name: CI
+on:
+  pull_request: {}
+  push:
+    branches:
+      - main
+env:
+  TERM: vt100
+  CI: 1
+jobs:
+  formatting:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Read .tool-versions
+        id: versions
+        uses: marocchino/tool-versions-action@v1
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: ${{ steps.versions.outputs.pnpm }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ steps.versions.outputs.nodejs }}
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Check formatting
+        run: make format
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || ( github.event_name == 'pull_request' && !github.event.pull_request.draft )
+    permissions:
+      contents: read
+      deployments: write
+      actions: read
+    environment:
+      name: >-
+        ${{ ( github.event_name == 'pull_request' && !github.event.pull_request.draft ) && 'Preview'
+        || ( github.ref == 'refs/heads/main' ) && 'Production' }}
+      url: ${{ steps.url.outputs.inspect-url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: "true"
+      - name: Read .tool-versions
+        id: versions
+        uses: marocchino/tool-versions-action@v1
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: ${{ steps.versions.outputs.pnpm }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ steps.versions.outputs.nodejs }}
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Unlock .env
+        uses: sliteteam/github-action-git-crypt-unlock@1.2.0
+        env:
+          GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
+      - name: Read .env variables
+        uses: romeovs/dotenv@cc5f5c7834c5830cc82c86bc650963aadc4a4750
+        id: env
+      - name: Pull vercel project
+        run: vercel pull --yes --environment=production --token=${{ steps.env.outputs.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ steps.env.outputs.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ steps.env.outputs.VERCEL_PROJECT_ID }}
+      - name: Build (Preview)
+        if: github.event_name == 'pull_request' && !github.event.pull_request.draft
+        run: vercel build
+      - name: Build (Production)
+        if: github.ref == 'refs/heads/main'
+        run: vercel build --prod
+      - uses: yogeshlonkar/wait-for-jobs@v0
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          jobs: "Check formatting"
+      - name: Deploy to Vercel (Preview)
+        if: github.event_name == 'pull_request' && !github.event.pull_request.draft
+        run: vercel deploy --token=${{ steps.env.outputs.VERCEL_TOKEN }} --prebuilt --archive=tgz
+      - name: Deploy to Vercel (Production)
+        if: github.ref == 'refs/heads/main'
+        run: vercel deploy --token=${{ steps.env.outputs.VERCEL_TOKEN }} --prebuilt --archive=tgz --prod
