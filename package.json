@@ -7,5 +7,8 @@
   "dependencies": {
     "clean-css": "^4.1.11",
     "htmlmin": "^0.0.7"
+  },
+  "devDependencies": {
+    "prettier": "^3.1.0"
   }
 }
