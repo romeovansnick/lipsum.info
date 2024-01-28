@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Read .tool-versions
         id: versions
-        uses: marocchino/tool-versions-action@v1
+        uses: romeovs/tool-versions-action@v3
       - uses: pnpm/action-setup@v2
         name: Install pnpm
         with:
@@ -51,7 +51,7 @@ jobs:
           lfs: "true"
       - name: Read .tool-versions
         id: versions
-        uses: marocchino/tool-versions-action@v1
+        uses: romeovs/tool-versions-action@v3
       - uses: pnpm/action-setup@v2
         name: Install pnpm
         with:
